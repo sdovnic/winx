@@ -33,6 +33,8 @@ Adds some Essential Rules to your Windows Advanced Firewall.
 You will be asked before every Rule, if you like to apply it.
 
 * Allow all outgoing Secure Shell Traffic
+* Allow Advanced TCP/IP Network Printing
+* Allow the Service W32Time to contact Network Time Server
 
 To execute run:
 
