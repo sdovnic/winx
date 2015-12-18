@@ -266,3 +266,7 @@ Remove-Variable question
 # https://github.com/W4RH4WK/Debloat-Windows-10/blob/master/scripts/disable-windows-features.ps1
 
 Read-Host "You are done press any enter to exit"
+
+Benutzererfahrung und Telemetrie im verbundenen Modus
+
+# Diagnosenachverfolgungsdienst heisst jetzt Benutzererfahrung und Telemetrie im verbundenen Modus 
