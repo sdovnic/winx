@@ -108,7 +108,7 @@ Remove-Variable -Name Wpf*
             <Label x:Name="label0" Content="Label" HorizontalAlignment="Left" VerticalAlignment="Top"/>
         </Grid>
         <Grid Margin="10" HorizontalAlignment="Left" VerticalAlignment="Bottom">
-            <CheckBox x:Name="checkbox0" HorizontalAlignment="Left" VerticalAlignment="Center"/><Label Content="Label" x:Name="label1" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="15,0,0,0"/>
+            <CheckBox x:Name="checkbox0" HorizontalAlignment="Left" VerticalAlignment="Bottom"/><Label Content="Label" x:Name="label1" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="15,0,0,-5"/>
         </Grid>
         <Grid Margin="10" HorizontalAlignment="Right" VerticalAlignment="Bottom">
             <Button x:Name="button0" Content="Button" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="75"/>
@@ -122,7 +122,7 @@ Add-Type -AssemblyName PresentationCore,PresentationFramework,WindowsBase,System
 $Form = [Windows.Markup.XamlReader]::Load((New-Object -TypeName System.Xml.XmlNodeReader -ArgumentList $Xaml))
 $Xaml.SelectNodes("//*[@Name]") | ForEach-Object { Set-Variable -Name "Wpf.$($_.Name)" -Value $Form.FindName($_.Name) }
 Set-Location $PSScriptRoot
-${Wpf.button0}.Content = "Schließen"
+${Wpf.button0}.Content = "Schlie$([char]0x00DF)en"
 ${Wpf.button0}.add_Click({
     $Form.Close()
 })
@@ -168,7 +168,7 @@ ${Wpf.button2}.Content = "Wiederherstellen"
 ${Wpf.button2}.Width = 120
 ${Wpf.label0}.Content = "Achtung! Das entfernen von Flash aus Ihrem System kann Probleme mit Windows Update verursachen.`n`nSollten Probleme auftreten stellen Sie Flash aus dem Backup wieder her."
 ${Wpf.label0}.Height = 180
-${Wpf.label1}.Content = "Flash Benutzerdaten mitentfernen."
+${Wpf.label1}.Content = "Flash Benutzerdaten mit entfernen."
 ${Wpf.checkbox0}.IsChecked = $true
 $Form.Title = "Flash"
 $Form.Height = 190
