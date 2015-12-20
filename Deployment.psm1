@@ -165,7 +165,7 @@ function Set-Telemetry {
         } elseif ($Action.Contains("Restore")) {
             Remove-ItemProperty -Path $Path -Name "AllowTelemetry"
         } elseif ($Action.Contains("Status")) {
-            if (Get-ItemProperty -Path $Path -Name "AllowTelemetry") {
+            if (Get-ItemProperty -Path $Path -Name "AllowTelemetry" -ErrorAction SilentlyContinue) {
                 return $false
             } else {
                 return $true

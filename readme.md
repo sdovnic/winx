@@ -9,8 +9,7 @@
 * Removes Windows OnDrive
 * Disables unnecessary Windows Services
 * Disables Windows Telemetry
-* Sets Alternative Time Servers
-* Disables Cortana
+* Sets Alternative Network Time Servers
 
 You will be asked to continue before every step. Please Review the `Deployment.ps1` before you execute the Script. You can remove or add your custom actions that fits your need.
 
@@ -34,7 +33,7 @@ You will be asked before every Rule, if you like to apply it.
 
 * Allow all outgoing Secure Shell Traffic
 * Allow Advanced TCP/IP Network Printing
-* Allow the Service W32Time to contact Network Time Server
+* Allow the Service W32Time to contact a Network Time Server
 
 To execute run:
 
