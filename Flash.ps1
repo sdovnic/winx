@@ -121,7 +121,7 @@ Remove-Variable -Name Wpf*
 Add-Type -AssemblyName PresentationCore,PresentationFramework,WindowsBase,System.Windows.Forms
 $Form = [Windows.Markup.XamlReader]::Load((New-Object -TypeName System.Xml.XmlNodeReader -ArgumentList $Xaml))
 $Xaml.SelectNodes("//*[@Name]") | ForEach-Object { Set-Variable -Name "Wpf.$($_.Name)" -Value $Form.FindName($_.Name) }
-Set-Location $PSScriptRoot
+Set-Location -Path $PSScriptRoot
 ${Wpf.button0}.Content = "Schlie$([char]0x00DF)en"
 ${Wpf.button0}.add_Click({
     $Form.Close()
@@ -138,12 +138,14 @@ ${Wpf.button1}.add_Click({
             "Flash wurde entfernt.",
             "Flash", 0, [System.Windows.Forms.MessageBoxIcon]::Information
         )
+        $Form.Close()
     } else {
         [System.Reflection.Assembly]::LoadWithPartialName("System.Windows.Forms")
         $Result = [System.Windows.Forms.MessageBox]::Show(
             "Flash wurde bereits entfernt!",
             "Flash", 0, [System.Windows.Forms.MessageBoxIcon]::Error
         )
+        $Form.Close()
     }
 })
 ${Wpf.button2}.add_Click({
@@ -155,12 +157,14 @@ ${Wpf.button2}.add_Click({
             "Flash wurde wiederhergestellt.",
             "Flash", 0, [System.Windows.Forms.MessageBoxIcon]::Information
         )
+        $Form.Close()
     } else {
         [System.Reflection.Assembly]::LoadWithPartialName("System.Windows.Forms")
         $Result = [System.Windows.Forms.MessageBox]::Show(
             "Kein Backup von Flash gefunden! Bitte stellen Sie das Backup aus einem Archiv in den Ordner `"$Path`" wieder her.",
             "Flash", 0, [System.Windows.Forms.MessageBoxIcon]::Error
         )
+        $Form.Close()
     }
 })
 ${Wpf.button1}.Content = "Entfernen"

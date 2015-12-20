@@ -62,27 +62,34 @@ function Set-HomeGroup {
 function Set-Cortana {
     [CmdletBinding()]
     param(
-        [parameter(Mandatory=$true)] [ValidateSet("Disable", "Restore")] [string] $Action
+        [parameter(Mandatory=$true)] [ValidateSet("Disable", "Restore", "Status")] [string] $Action
     )
     process {
         $Path = "HKLM:\Software\Policies\Microsoft\Windows\Windows Search"
         if ($Action.Contains("Disable")) {
-            Set-ItemProperty -Path $Path -Name "AllowCortana" -Value "0"
-            Set-ItemProperty -Path $Path -Name "DisableWebSearch" -Value "1"
-            Set-ItemProperty -Path $Path -Name "AllowSearchToUseLocation" -Value "0"
-            Set-ItemProperty -Path $Path -Name "ConnectedSearchUseWeb" -Value "0"
-        }
-        if ($Action.Contains("Restore")) {
+            Set-ItemProperty -Path $Path -Name "AllowCortana" -Value "0" -Force
+            Set-ItemProperty -Path $Path -Name "DisableWebSearch" -Value "1" -Force
+            Set-ItemProperty -Path $Path -Name "AllowSearchToUseLocation" -Value "0" -Force
+            Set-ItemProperty -Path $Path -Name "ConnectedSearchUseWeb" -Value "0" -Force
+        } elseif ($Action.Contains("Restore")) {
             Remove-ItemProperty -Path $Path -Name "AllowCortana"
             Remove-ItemProperty -Path $Path -Name "DisableWebSearch"
             Remove-ItemProperty -Path $Path -Name "AllowSearchToUseLocation"
             Remove-ItemProperty -Path $Path -Name "ConnectedSearchUseWeb"
+        } elseif ($Action.Contains("Status")) {
+            if (Get-ItemProperty -Path $Path -Name "DisableWebSearch" -ErrorAction SilentlyContinue) {
+                return $false
+            } else {
+                return $true
+            }
         }
     }
 }
 
 function Set-OneDrive {
-    param([parameter(Mandatory=$true)] [ValidateSet("Install", "Uninstall")] [string] $Action)
+    param(
+        [parameter(Mandatory=$true)] [ValidateSet("Install", "Uninstall", "Status")] [string] $Action
+    )
     process {
         [string] $Architecture = (Get-WmiObject -Class Win32_OperatingSystem -ComputerName $env:COMPUTERNAME).OSArchitecture
         if ($Architecture -match "64-Bit") {
@@ -91,7 +98,23 @@ function Set-OneDrive {
             $Path = "$env:SystemRoot\System32"
         }
         $Path = Join-Path -Path $Path -ChildPath "OneDriveSetup.exe"
-        if ($Action.Contains("Uninstall")) {
+        if ($Action.Contains("Status")) {
+            $RemoveOneDrive = $false
+            [array] $Folders = @(
+                "$env:LOCALAPPDATA\Microsoft\OneDrive",
+                "$env:ProgramData\Microsoft OneDrive",
+                "$env:USERPROFILE\OneDrive",
+                "$env:SystemDrive\OneDriveTemp"
+            )
+            foreach ($Folder in $Folders) {
+                if (Test-Path -Path $Folder) {
+                    $RemoveOneDrive = $true
+                }
+            }
+            if ($RemoveOneDrive) {
+                return $RemoveOneDrive
+            }
+        } elseif ($Action.Contains("Uninstall")) {
             Write-Verbose -Message "Invoking Uninstall from OneDrive"
             Start-Process -FilePath $Path -ArgumentList "/uninstall" -Wait
             [array] $Folders = @(
@@ -103,7 +126,7 @@ function Set-OneDrive {
             foreach ($Folder in $Folders) {
                 if (Test-Path -Path $Folder) {
                     Write-Verbose -Message "Removing $Folder"
-                    Remove-Item -Path $Folder -Recurse
+                    Remove-Item -Path $Folder -Recurse -Force
                 }
             }
             New-PSDrive -PSProvider "Registry" -Root "HKEY_CLASSES_ROOT" -Name "HKCR"
@@ -124,7 +147,6 @@ function Set-OneDrive {
                 }
             }
             Remove-PSDrive -Name "HKCR"
-            $Restart = $true
         } elseif ($Action.Contains("Install")) {
             Start-Process -FilePath $Path -Wait
         }
@@ -134,21 +156,26 @@ function Set-OneDrive {
 function Set-Telemetry {
     [CmdletBinding()]
     param(
-        [parameter(Mandatory=$true)] [ValidateSet("Disable", "Restore")] [string] $Action
+        [parameter(Mandatory=$true)] [ValidateSet("Disable", "Restore", "Status")] [string] $Action
     )
     process {
         $Path = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection"
         if ($Action.Contains("Disable")) {
             Set-ItemProperty -Path $Path -Name "AllowTelemetry" -Value "0"
-        }
-        if ($Action.Contains("Restore")) {
+        } elseif ($Action.Contains("Restore")) {
             Remove-ItemProperty -Path $Path -Name "AllowTelemetry"
+        } elseif ($Action.Contains("Status")) {
+            if (Get-ItemProperty -Path $Path -Name "AllowTelemetry") {
+                return $false
+            } else {
+                return $true
+            }
         }
     }
 }
 
 function Set-TimeServer {
-    param([parameter(Mandatory=$true)] [ValidateSet("Default", "Alternative", "Status")] [string] $Action)
+    param([parameter(Mandatory=$true)] [ValidateSet("Default", "Alternative", "Current", "Status")] [string] $Action)
     process {
         if ($Action.Contains("Alternative")) {
             $Path = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\DateTime\Servers"
@@ -180,6 +207,12 @@ function Set-TimeServer {
             Set-ItemProperty -Path $Path -Name "NtpServer" -Value "time.windows.com"
             Restart-Service -Name W32Time
             & 'w32tm' '/resync'
+        } elseif ($Action.Contains("Current")) {
+            if (Get-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\services\W32Time\Parameters" -Name "NtpServer" | Where-Object {$_.NtpServer -eq "0.de.pool.ntp.org"}) {
+                return "Alternative"
+            } else {
+                return "Default"
+            }
         }
     }
 }

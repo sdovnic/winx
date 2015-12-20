@@ -11,42 +11,30 @@ if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdenti
     return
 }
 
-"Allow all Secure Shell Traffic from this Machine."
+"Default Answer is No."
 
-$question = Read-Host -Prompt "`nAre you sure? [y/n]"
-
-"`n"
-
-if (($question.ToLower() -eq "y") -or ($question.ToLower() -eq "j")) {
-    if (-not (Get-NetFirewallRule -Name "Secure Shell" -ErrorAction SilentlyContinue)) {
+if (-not (Get-NetFirewallRule -Name "Secure Shell" -ErrorAction SilentlyContinue)) {
+    $question = Read-Host -Prompt "Allow all Secure Shell Traffic from this Machine [y/N]"
+    if (($question.ToLower() -eq "y") -or ($question.ToLower() -eq "j")) {
         New-NetFirewallRule -Name "Secure Shell" -DisplayName "Secure Shell" -Enabled True -Profile Any -Direction Outbound -Action Allow -Protocol "TCP" -RemotePort 22
     }
+    Remove-Variable -Name question
 }
 
-"Allow the W32Time Service to contact a Network Time Server."
-
-$question = Read-Host -Prompt "`nAre you sure? [y/n]"
-
-"`n"
-
-if (($question.ToLower() -eq "y") -or ($question.ToLower() -eq "j")) {
-    if (-not (Get-NetFirewallRule -Name "W32Time" -ErrorAction SilentlyContinue)) {
+if (-not (Get-NetFirewallRule -Name "W32Time" -ErrorAction SilentlyContinue)) {
+    $question = Read-Host -Prompt "Allow the W32Time Service to contact a Network Time Server [y/N]"
+    if (($question.ToLower() -eq "y") -or ($question.ToLower() -eq "j")) {
         New-NetFirewallRule -Name "W32Time" -DisplayName "W32Time" -Enabled True -Profile Any -Direction Outbound -Action Allow -Service W32Time
     }
+    Remove-Variable -Name question
 }
 
-"Allow this Machine to contact a Network Printer in your local Subnet."
-
-$question = Read-Host -Prompt "`nAre you sure? [y/n]"
-
-"`n"
-
-if (($question.ToLower() -eq "y") -or ($question.ToLower() -eq "j")) {
-    if (-not (Get-NetFirewallRule -Name "Advanced TCP/IP Printer Port" -ErrorAction SilentlyContinue)) {
+if (-not (Get-NetFirewallRule -Name "Advanced TCP/IP Printer Port" -ErrorAction SilentlyContinue)) {
+    $question = Read-Host -Prompt "Allow this Machine to contact a Network Printer in your local Subnet [y/n]"
+    if (($question.ToLower() -eq "y") -or ($question.ToLower() -eq "j")) {
         New-NetFirewallRule -Name "Advanced TCP/IP Printer Port" -DisplayName "Advanced TCP/IP Printer Port" -Enabled True -Profile Any -Direction Outbound -Action Allow -RemoteAddress LocalSubnet -RemotePort 9100 -Protocol "TCP"
     }
+    Remove-Variable -Name question
 }
 
-Remove-Variable question
-
-Read-Host "You are done press any enter to exit"
+Read-Host -Prompt "You are done press enter to exit"

@@ -5,7 +5,7 @@ if ($PSVersionTable.PSVersion.Major -lt 3) {
     [string] $PSCommandPath = $MyInvocation.MyCommand.Definition
 }
 
-Set-Location $PSScriptRoot
+Set-Location -Path $PSScriptRoot
 
 Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath "Deployment.psm1")
 
@@ -18,6 +18,10 @@ if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdenti
                   -ArgumentList "-NoProfile -ExecutionPolicy Bypass -File $PSCommandPath"
     return
 }
+
+# You can remove or apply your custom choices to this arrays.
+
+# Windows Applications
 
 [array] $Applications = @(
     "Microsoft.MicrosoftSolitaireCollection",
@@ -33,8 +37,6 @@ if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdenti
     "Microsoft.Office.OneNote",
     "Microsoft.Windows.Photos",
     "Microsoft.XboxApp",
-    #"Microsoft.XboxGameCallableUI",
-    #"Microsoft.XboxIdentityProvider",
     "Microsoft.WindowsAlarms",
     "Microsoft.WindowsSoundRecorder",
     "Microsoft.People",
@@ -50,28 +52,18 @@ if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdenti
     "Microsoft.Messaging",
     "king.com.CandyCrushSodaSaga",
     "9E2F88E3.Twitter"
-    #"Windows.ContactSupport"
 )
 
-"These Applications will be removed:`n"
-foreach ($Application in $Applications) {
-    $Application
-}
-$question = Read-Host -Prompt "`nAre you sure? [y/n]"
+# Windows Optional Features
 
-"`n"
+[array] $Features = @(
+    "Internet-Explorer-Optional-amd64",
+    "MediaPlayback",
+    "WindowsMediaPlayer",
+    "WorkFolders-Client"
+)
 
-if (($question.ToLower() -eq "y") -or ($question.ToLower() -eq "j")) {
-    [int] $Index = 0
-    foreach ($Application in $Applications) {
-        Write-Progress -Activity "Removing Applications" -Status $Application -PercentComplete ($Index / $Applications.Count * 100)
-        Set-Application -Application $Application -Action Remove
-    }
-}
-
-"`n"
-
-Remove-Variable question
+# Windows Firewall Rule Groups
 
 [array] $Groups = @(
     "windows_ie_ac_001",
@@ -119,76 +111,7 @@ Remove-Variable question
     "@{Microsoft.LockApp_10.0.10586.0_neutral__cw5n1h2txyewy?ms-resource://Microsoft.LockApp/resources/AppDisplayName}"
 )
 
-"These Firewall Rules will be disabled:`n"
-foreach ($Group in $Groups) {
-    $(Get-NetFirewallRule -Group $Group -ErrorAction SilentlyContinue | Select-Object -ExpandProperty DisplayName)
-}
-$question = Read-Host -Prompt "`nAre you sure? [y/n]"
-
-"`n"
-
-if (($question.ToLower() -eq "y") -or ($question.ToLower() -eq "j")) {
-    [int] $Index = 0
-    foreach ($Group in $Groups) {
-        Write-Progress -Activity "Disabling Firewall Rule" -Status $Group -PercentComplete ($Index / $Groups.Count * 100)
-        Set-ApplicationFirewallGroup -Group $Group -Enable False
-    }
-}
-
-"`n"
-
-Remove-Variable question
-
-[array] $Features = @(
-    "Internet-Explorer-Optional-amd64",
-    "MediaPlayback",
-    "WindowsMediaPlayer",
-    "WorkFolders-Client"
-)
-
-"These Optional Windows Features will be disabled:`n"
-foreach ($Feature in $Features) {
-    $Feature
-}
-$question = Read-Host -Prompt "`nAre you sure? [y/n]"
-
-"`n"
-
-if (($question.ToLower() -eq "y") -or ($question.ToLower() -eq "j")) {
-    foreach ($Feature in $Features) {
-        #if (-not (Get-WindowsOptionalFeature -Online -FeatureName $Feature | Select-Object -Property State) -eq "Disabled") {
-            Disable-WindowsOptionalFeature -Online -NoRestart -FeatureName $Feature
-        #}
-    }
-}
-
-# https://github.com/W4RH4WK/Debloat-Windows-10/blob/master/scripts/disable-windows-features.ps1
-
-Remove-Variable question
-
-$question = Read-Host -Prompt "`nDo you like to disable Windows Home Groups? [y/n]"
-
-"`n"
-
-if (($question.ToLower() -eq "y") -or ($question.ToLower() -eq "j")) {
-    Set-HomeGroup -Action Disable
-}
-
-Remove-Variable question
-
-$question = Read-Host -Prompt "`nDo you like to remove Microsoft OneDrive? [y/n]"
-
-"`n"
-
-if (($question.ToLower() -eq "y") -or ($question.ToLower() -eq "j")) {
-    Set-OneDrive -Action Uninstall
-}
-
-# Todo: https://github.com/W4RH4WK/Debloat-Windows-10/blob/master/scripts/remove-onedrive.ps1
-
-"`n"
-
-Remove-Variable question
+# Windows Services
 
 $Services = @(
     "diagnosticshub.standardcollector.service"  # Microsoft (R) Diagnostics Hub Standard Collector Service
@@ -211,62 +134,106 @@ $Services = @(
     "XblAuthManager"                            # Xbox Live Auth Manager
     "XblGameSave"                               # Xbox Live Game Save Service
     "XboxNetApiSvc"                             # Xbox Live Networking Service
-
-    # Services which cannot be disabled
-    #"WdNisSvc"
 )
 
-"These Services will be disabled:`n"
-foreach ($Service in $Services) {
-    $(Get-Service -Name $Service | Select-Object -ExpandProperty DisplayName)
-}
-$question = Read-Host -Prompt "`nAre you sure? [y/n]"
+# Script starts here
 
-if (($question.ToLower() -eq "y") -or ($question.ToLower() -eq "j")) {
-    foreach ($Service in $Services) {
-        Get-Service -Name $Service | Set-Service -StartupType Disabled
-        Get-Service -Name $Service | Set-Service -Status Stopped -ErrorAction SilentlyContinue
+$Restart = $false
+
+"Default Answer is Yes."
+
+foreach ($Application in $Applications) {
+    if (Get-AppxPackage -Name $Application -User $env:USERNAME -ErrorAction SilentlyContinue) {
+        $question = Read-Host -Prompt "Remove Application: ${Application}? [Y/n]"
+        if (-not ($question.ToLower() -eq "n")) {
+            Set-Application -Application $Application -Action Remove
+        }
+        Remove-Variable -Name question
     }
 }
 
-# https://github.com/W4RH4WK/Debloat-Windows-10/blob/master/scripts/disable-services.ps1
-
-"`n"
-
-Remove-Variable question
-
-$question = Read-Host -Prompt "`nDo you like to disable Windows Telemetry? [y/n]"
-
-if (($question.ToLower() -eq "y") -or ($question.ToLower() -eq "j")) {
-    Set-Telemetry -Action Disable
+foreach ($Feature in $Features) {
+    if (Get-WindowsOptionalFeature -FeatureName $Feature -Online -ErrorAction SilentlyContinue | Where-Object {$_.State -eq "Enabled"}) {
+        $question = Read-Host -Prompt "Disable Windows Optional Feature: ${Feature}? [Y/n]"
+        if (-not ($question.ToLower() -eq "n")) {
+            Disable-WindowsOptionalFeature -Online -NoRestart -FeatureName $Feature
+            $Restart = $true
+        }
+        Remove-Variable -Name question
+    }
 }
 
-# https://github.com/W4RH4WK/Debloat-Windows-10/blob/master/scripts/disable-windows-features.ps1
-
-Remove-Variable question
-
-$question = Read-Host -Prompt "`nDo you like to set Alternative Time Servers? [y/n]"
-if (($question.ToLower() -eq "y") -or ($question.ToLower() -eq "j")) {
-    Set-TimeServer -Action Alternative
+foreach ($Group in $Groups) {
+    if (Get-NetFirewallRule -Group $Group -ErrorAction SilentlyContinue | Where-Object {$_.Enabled -eq "True"}) {
+        [array] $DisplayName = Get-NetFirewallRule -Group $Group | Select-Object -ExpandProperty DisplayName
+        $DisplayName = $DisplayName[0]
+        $question = Read-Host -Prompt "Disable Firewall Rule: ${DisplayName}? [Y/n]"
+        if (-not ($question.ToLower() -eq "n")) {
+            Set-ApplicationFirewallGroup -Group $Group -Enable False
+        }
+        Remove-Variable -Name question
+    }
 }
 
-"`n"
-
-Remove-Variable question
-
-$question = Read-Host -Prompt "`nDo you like to disable Cortana? [y/n]"
-if (($question.ToLower() -eq "y") -or ($question.ToLower() -eq "j")) {
-    Set-Cortana -Action Disable
+foreach ($Service in $Services) {
+    if (-not (Get-Service -Name $Service | Where-Object {$_.StartType -eq "Disabled"})) {
+        $DisplayName = $(Get-Service -Name $Service | Select-Object -ExpandProperty DisplayName)
+        $question = Read-Host -Prompt "Disable Service: ${DisplayName}? [Y/n]"
+        if (-not ($question.ToLower() -eq "n")) {
+            Get-Service -Name $Service | Set-Service -StartupType Disabled
+            Get-Service -Name $Service | Set-Service -Status Stopped -ErrorAction SilentlyContinue
+            $Restart = $true
+        }
+        Remove-Variable -Name question
+    }
 }
 
-"`n"
+if (-not (Get-Service -Name HomeGroupProvider -ErrorAction SilentlyContinue | Where-Object {$_.StartType -eq "Disabled"})) {
+    $question = Read-Host -Prompt "Disable Windows Home Groups? [Y/n]"
+    if (-not ($question.ToLower() -eq "n")) {
+        Set-HomeGroup -Action Disable
+        $Restart = $true
+    }
+    Remove-Variable -Name question
+}
 
-Remove-Variable question
+if (Set-OneDrive -Action Status) {
+    $question = Read-Host -Prompt "Remove Microsoft OneDrive? [Y/n]"
+    if (-not ($question.ToLower() -eq "n")) {
+        Set-OneDrive -Action Uninstall
+        $Restart = $true
+    }
+    Remove-Variable -Name question
+}
 
-# https://github.com/W4RH4WK/Debloat-Windows-10/blob/master/scripts/disable-windows-features.ps1
+if (Set-Telemetry -Action Status) {
+    $question = Read-Host -Prompt "Disable Windows Telemetry? [Y/n]"
+    if (-not ($question.ToLower() -eq "n")) {
+        Set-Telemetry -Action Disable
+        $Restart = $true
+    }
+    Remove-Variable -Name question
+}
 
-Read-Host "You are done press any enter to exit"
+#if (Set-Cortana -Action Status) {
+#    $question = Read-Host -Prompt "Disable Windows Cortana? [Y/n]"
+#    if (-not ($question.ToLower() -eq "n")) {
+#        Set-Cortana -Action Disable
+#    }
+#    Remove-Variable -Name question
+#}
 
-Benutzererfahrung und Telemetrie im verbundenen Modus
+if ((Set-TimeServer -Action Current) -eq "Default") {
+    $question = Read-Host -Prompt "Set Alternative Network Time Servers? [Y/n]"
+    if (-not ($question.ToLower() -eq "n")) {
+        Set-TimeServer -Action Alternative
+        $Restart = $true
+    }
+    Remove-Variable -Name question
+}
 
-# Diagnosenachverfolgungsdienst heisst jetzt Benutzererfahrung und Telemetrie im verbundenen Modus 
+if ($Restart) {
+    "You may need to restart your Computer."
+}
+
+Read-Host -Prompt "You are done press enter to exit"

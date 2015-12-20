@@ -86,7 +86,7 @@ Remove-Variable -Name Wpf*
 Add-Type -AssemblyName PresentationCore,PresentationFramework,WindowsBase,System.Windows.Forms
 $Form = [Windows.Markup.XamlReader]::Load((New-Object -TypeName System.Xml.XmlNodeReader -ArgumentList $Xaml))
 $Xaml.SelectNodes("//*[@Name]") | ForEach-Object { Set-Variable -Name "Wpf.$($_.Name)" -Value $Form.FindName($_.Name) }
-Set-Location $PSScriptRoot
+Set-Location -Path $PSScriptRoot
 ${Wpf.button0}.Content = "Schlie$([char]0x00DF)en"
 ${Wpf.button0}.add_Click({
     $Form.Close()
