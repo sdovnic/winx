@@ -233,7 +233,7 @@ if ((Set-TimeServer -Action Current) -eq "Default") {
 }
 
 if ($Restart) {
-    "You may need to restart your Computer."
+    "You may need to restart your Computer and rerun the script."
 }
 
 Read-Host -Prompt "You are done press enter to exit"
