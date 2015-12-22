@@ -39,10 +39,10 @@ if (-not (Get-NetFirewallRule -Name "Advanced TCP/IP Printer Port" -ErrorAction 
     Remove-Variable -Name question
 }
 
-if (-not (Get-NetFirewallRule -Name "Domain Name Service" -ErrorAction SilentlyContinue)) {
-    $question = Read-Host -Prompt $messages."Allow this Computer to contact a Domain Name Service in your local subnet [y/N]"
+if (-not (Get-NetFirewallRule -Name "Domain Name Server" -ErrorAction SilentlyContinue)) {
+    $question = Read-Host -Prompt $messages."Allow this Computer to contact a Domain Name Server in your local subnet [y/N]"
     if (($question.ToLower() -eq "y") -or ($question.ToLower() -eq "j")) {
-        New-NetFirewallRule -Name "Domain Name Service" -DisplayName "Domain Name Service" -Enabled True -Profile Any -Direction Outbound -Action Allow -RemoteAddress LocalSubnet -RemotePort 53 -Protocol "UDP"
+        New-NetFirewallRule -Name "Domain Name Server" -DisplayName "Domain Name Server" -Enabled True -Profile Any -Direction Outbound -Action Allow -RemoteAddress LocalSubnet -RemotePort 53 -Protocol "UDP"
     }
     Remove-Variable -Name question
 }
