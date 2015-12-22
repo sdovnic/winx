@@ -3,6 +3,9 @@
                   -ArgumentList "-NoProfile -ExecutionPolicy Bypass -File $PSCommandPath"
     return
 }
+
+Import-LocalizedData -BindingVariable messages -ErrorAction SilentlyContinue
+
 function Set-PhotoViewer {
     <#
         .SYNOPSIS
@@ -87,7 +90,7 @@ Add-Type -AssemblyName PresentationCore,PresentationFramework,WindowsBase,System
 $Form = [Windows.Markup.XamlReader]::Load((New-Object -TypeName System.Xml.XmlNodeReader -ArgumentList $Xaml))
 $Xaml.SelectNodes("//*[@Name]") | ForEach-Object { Set-Variable -Name "Wpf.$($_.Name)" -Value $Form.FindName($_.Name) }
 Set-Location -Path $PSScriptRoot
-${Wpf.button0}.Content = "Schlie$([char]0x00DF)en"
+${Wpf.button0}.Content = $messages."Close"
 ${Wpf.button0}.add_Click({
     $Form.Close()
 })
@@ -109,8 +112,8 @@ ${Wpf.button2}.add_Click({
     )
     $Form.Close()
 })
-${Wpf.button1}.Content = "Aktivieren"
-${Wpf.button2}.Content = "Wiederherstellen"
+${Wpf.button1}.Content = $messages."Activate"
+${Wpf.button2}.Content = $messages."Restore"
 ${Wpf.button2}.Width = 120
 ${Wpf.label0}.Content = "Aktiviert das Fotoanzeigeprogramm PhotoViewer unter Windows 10.`n`nVerwenden Sie Wiederherstellen um auf den Werkszustand zur$([char]0x00FC)ckzusetzten."
 ${Wpf.label0}.Height = 180

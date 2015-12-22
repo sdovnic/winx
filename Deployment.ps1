@@ -19,6 +19,8 @@ if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdenti
     return
 }
 
+Import-LocalizedData -BindingVariable messages -ErrorAction SilentlyContinue
+
 # You can remove or apply your custom choices to this arrays.
 
 # Windows Applications
@@ -140,26 +142,30 @@ $Services = @(
 
 $Restart = $false
 
-"Default Answer is Yes."
+$messages."The default answer is yes."
 
 foreach ($Application in $Applications) {
     if (Get-AppxPackage -Name $Application -User $env:USERNAME -ErrorAction SilentlyContinue) {
-        $question = Read-Host -Prompt "Remove Application: ${Application}? [Y/n]"
+        $question = Read-Host -Prompt ($messages."Remove Application: {0}? [Y/n]" -f $Application)
         if (-not ($question.ToLower() -eq "n")) {
             Set-Application -Application $Application -Action Remove
         }
         Remove-Variable -Name question
+    } else {
+        $messages."You already removed the following Application: {0}" -f $Application
     }
 }
 
 foreach ($Feature in $Features) {
     if (Get-WindowsOptionalFeature -FeatureName $Feature -Online -ErrorAction SilentlyContinue | Where-Object {$_.State -eq "Enabled"}) {
-        $question = Read-Host -Prompt "Disable Windows Optional Feature: ${Feature}? [Y/n]"
+        $question = Read-Host -Prompt ($messages."Disable Windows Optional Feature: {0}? [Y/n]" -f $Feature)
         if (-not ($question.ToLower() -eq "n")) {
             Disable-WindowsOptionalFeature -Online -NoRestart -FeatureName $Feature
             $Restart = $true
         }
         Remove-Variable -Name question
+    } else {
+        $messages."You already disabled the following Windows Optional Feature: {0}" -f $Feature
     }
 }
 
@@ -167,52 +173,65 @@ foreach ($Group in $Groups) {
     if (Get-NetFirewallRule -Group $Group -ErrorAction SilentlyContinue | Where-Object {$_.Enabled -eq "True"}) {
         [array] $DisplayName = Get-NetFirewallRule -Group $Group | Select-Object -ExpandProperty DisplayName
         $DisplayName = $DisplayName[0]
-        $question = Read-Host -Prompt "Disable Firewall Rule: ${DisplayName}? [Y/n]"
+        $question = Read-Host -Prompt ($messages."Disable Firewall Rule: {0}? [Y/n]" -f $DisplayName)
         if (-not ($question.ToLower() -eq "n")) {
             Set-ApplicationFirewallGroup -Group $Group -Enable False
         }
         Remove-Variable -Name question
+    } elseif (Get-NetFirewallRule -Group $Group -ErrorAction SilentlyContinue | Where-Object {$_.Enabled -eq "False"}) {
+        [array] $DisplayName = Get-NetFirewallRule -Group $Group | Select-Object -ExpandProperty DisplayName
+        $DisplayName = $DisplayName[0]
+        $messages."You already disabled the following Firewall Rule: {0}" -f $DisplayName
     }
 }
 
 foreach ($Service in $Services) {
     if (-not (Get-Service -Name $Service | Where-Object {$_.StartType -eq "Disabled"})) {
         $DisplayName = $(Get-Service -Name $Service | Select-Object -ExpandProperty DisplayName)
-        $question = Read-Host -Prompt "Disable Service: ${DisplayName}? [Y/n]"
+        $question = Read-Host -Prompt ($messages."Disable Service: {0}? [Y/n]" -f $DisplayName)
         if (-not ($question.ToLower() -eq "n")) {
             Get-Service -Name $Service | Set-Service -StartupType Disabled
             Get-Service -Name $Service | Set-Service -Status Stopped -ErrorAction SilentlyContinue
             $Restart = $true
         }
         Remove-Variable -Name question
+    } elseif (Get-Service -Name $Service | Where-Object {$_.StartType -eq "Disabled"}) {
+        $DisplayName = $(Get-Service -Name $Service | Select-Object -ExpandProperty DisplayName)
+        $messages."You already disabled the following Service: {0}" -f $DisplayName
     }
 }
 
 if (-not (Get-Service -Name HomeGroupProvider -ErrorAction SilentlyContinue | Where-Object {$_.StartType -eq "Disabled"})) {
-    $question = Read-Host -Prompt "Disable Windows Home Groups? [Y/n]"
+    $question = Read-Host -Prompt $messages."Disable Windows Home Groups? [Y/n]"
     if (-not ($question.ToLower() -eq "n")) {
         Set-HomeGroup -Action Disable
         $Restart = $true
     }
     Remove-Variable -Name question
+} else {
+    $messages."You already disabled Windows Home Groups."
 }
 
 if (Set-OneDrive -Action Status) {
-    $question = Read-Host -Prompt "Remove Microsoft OneDrive? [Y/n]"
+    $question = Read-Host -Prompt $messages."Remove Microsoft OneDrive? [Y/n]"
     if (-not ($question.ToLower() -eq "n")) {
         Set-OneDrive -Action Uninstall
         $Restart = $true
     }
     Remove-Variable -Name question
+} else {
+    $messages."You already removed Microsoft OneDrive."
 }
 
 if (Set-Telemetry -Action Status) {
-    $question = Read-Host -Prompt "Disable Windows Telemetry? [Y/n]"
+    $question = Read-Host -Prompt $messages."Disable Windows Telemetry? [Y/n]"
     if (-not ($question.ToLower() -eq "n")) {
         Set-Telemetry -Action Disable
         $Restart = $true
     }
     Remove-Variable -Name question
+} else {
+    $messages."You already disabled Windows Telemetry."
 }
 
 #if (Set-Cortana -Action Status) {
@@ -224,16 +243,18 @@ if (Set-Telemetry -Action Status) {
 #}
 
 if ((Set-TimeServer -Action Current) -eq "Default") {
-    $question = Read-Host -Prompt "Set Alternative Network Time Servers? [Y/n]"
+    $question = Read-Host -Prompt $messages."Set alternative Network Time Servers? [Y/n]"
     if (-not ($question.ToLower() -eq "n")) {
         Set-TimeServer -Action Alternative
         $Restart = $true
     }
     Remove-Variable -Name question
+} else {
+    $messages."You already set alternative Network Time Servers."
 }
 
 if ($Restart) {
-    "You may need to restart your Computer and rerun the script."
+    $messages."You may need to restart your computer and run the script again."
 }
 
-Read-Host -Prompt "You are done press enter to exit"
+Read-Host -Prompt $messages."You are done, press enter to exit"
