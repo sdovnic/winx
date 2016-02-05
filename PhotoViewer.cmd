@@ -1,1 +1,1 @@
-@powershell -NoProfile -ExecutionPolicy Bypass -File .\PhotoViewer.ps1
+@start /min powershell -NoProfile -ExecutionPolicy Bypass -File .\PhotoViewer.ps1
