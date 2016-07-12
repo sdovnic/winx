@@ -1,7 +1,8 @@
 ﻿function Set-Application {
     param(
         [parameter(Mandatory=$true)] [ValidateSet("Remove", "Install")] [string] $Action,
-        [parameter(Mandatory=$true)] [string] $Application
+        [parameter(Mandatory=$true)] [string] $Application,
+        [parameter(Mandatory=$true)] [string] $User = $env:USERNAME
     )
     process {
         if ($Action.Contains("Remove")) {
