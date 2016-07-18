@@ -1,5 +1,6 @@
 Flash-Backup/
 contrib/
+.vscode/
+*.exe
 *.zip
 *.xml
-*.exe

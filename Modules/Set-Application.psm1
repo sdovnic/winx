@@ -1,9 +1,9 @@
 ﻿function Set-Application {
-    param(
-        [parameter(Mandatory=$true)] [ValidateSet("Remove", "Install")] [string] $Action,
-        [parameter(Mandatory=$true)] [string] $Application
+    Param (
+        [Parameter(Mandatory=$true)] [ValidateSet("Remove", "Install")] [String] $Action,
+        [Parameter(Mandatory=$true)] [String] $Application
     )
-    process {
+    Process {
         if ($Action.Contains("Remove")) {
             If (Get-AppxPackage -Name $Application) {
                 Get-AppxPackage -Name "$Application" | Remove-AppxPackage

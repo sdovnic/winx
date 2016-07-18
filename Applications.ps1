@@ -1,13 +1,13 @@
 ﻿if ($PSVersionTable.PSVersion.Major -lt 3) {
-    [string] $PSScriptRoot = Split-Path -Path $MyInvocation.MyCommand.Definition -Parent
+    [String] $PSScriptRoot = Split-Path -Path $MyInvocation.MyCommand.Definition -Parent
 }
 if ($PSVersionTable.PSVersion.Major -lt 3) {
-    [string] $PSCommandPath = $MyInvocation.MyCommand.Definition
+   [String]] $PSCommandPath = $MyInvocation.MyCommand.Definition
 }
 
 Set-Location -Path $PSScriptRoot
 
-Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath "Applications.psm1")
+Import-Module -Name (Join-Path -Path $PSScriptRoot\Modules -ChildPath Set-Application)
 
 Set-PSDebug -Strict
 
@@ -19,7 +19,7 @@ Import-LocalizedData -BindingVariable messages -ErrorAction SilentlyContinue
 
 # Windows Applications
 
-[array] $Applications = @(
+[Array] $Applications = @(
     "Microsoft.MicrosoftSolitaireCollection",
     "Microsoft.3DBuilder",
     "Microsoft.BingSports",

@@ -35,15 +35,15 @@ function Set-Flash {
             This example will restore the Flash Files.
     #>
     [CmdletBinding()]
-    param(
-        [parameter(Mandatory=$true)] [ValidateSet("Delete", "Restore")] [string] $Action,
-        [parameter(Mandatory=$false)] [switch] $Dryrun,
-        [parameter(Mandatory=$false)] [switch] $Userdata
+    Param (
+        [Parameter(Mandatory=$true)] [ValidateSet("Delete", "Restore")] [String] $Action,
+        [Parameter(Mandatory=$false)] [Switch] $Dryrun,
+        [Parameter(Mandatory=$false)] [Switch] $Userdata
     )
-    process {
-        [string] $Architecture = (Get-WmiObject -Class Win32_OperatingSystem -ComputerName $env:COMPUTERNAME).OSArchitecture
+    Process {
+        [String] $Architecture = (Get-WmiObject -Class Win32_OperatingSystem -ComputerName $env:COMPUTERNAME).OSArchitecture
         if (-not $PSScriptRoot) { $true; $PSScriptRoot = $psISE.CurrentPowerShellTab.Prompt; }
-        [string] $Backup = "Flash-Backup"
+        [String] $Backup = "Flash-Backup"
         if ($Action.Contains("Delete")) {
             if (Test-Path -Path $Backup) {
                 [String] $BackupCopy = Join-Path -Path $PSScriptRoot -ChildPath "$Backup-$((Get-Date).ToString('yyyy-MM-dd-HH-mm-ss'))"
@@ -96,6 +96,7 @@ function Set-Flash {
         }
     }
 }
+
 Remove-Variable -Name Wpf*
 [xml] $Xaml = @"
 <Window x:Class="WpfApplication3.MainWindow"
@@ -164,7 +165,7 @@ ${Wpf.button2}.add_Click({
     } else {
         [System.Reflection.Assembly]::LoadWithPartialName("System.Windows.Forms")
         $Result = [System.Windows.Forms.MessageBox]::Show(
-            ("Kein Backup von Flash gefunden! Bitte stellen Sie das Backup aus einem Archiv in den Ordner `"{0}`" wieder her." -f $Path), 
+            ("Kein Backup von Flash gefunden! Bitte stellen Sie das Backup aus einem Archiv in den Ordner `"{0}`" wieder her." -f $Path),
             "Flash", 0, [System.Windows.Forms.MessageBoxIcon]::Error
         )
         $Form.Close()

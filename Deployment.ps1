@@ -1,13 +1,18 @@
 ﻿if ($PSVersionTable.PSVersion.Major -lt 3) {
-    [string] $PSScriptRoot = Split-Path -Path $MyInvocation.MyCommand.Definition -Parent
+    [String] $PSScriptRoot = Split-Path -Path $MyInvocation.MyCommand.Definition -Parent
 }
 if ($PSVersionTable.PSVersion.Major -lt 3) {
-    [string] $PSCommandPath = $MyInvocation.MyCommand.Definition
+    [String] $PSCommandPath = $MyInvocation.MyCommand.Definition
 }
 
 Set-Location -Path $PSScriptRoot
 
-Import-Module -Name (Join-Path -Path $PSScriptRoot -ChildPath "Deployment.psm1")
+Import-Module -Name (Join-Path -Path $PSScriptRoot\Modules -ChildPath Set-OneDrive)
+Import-Module -Name (Join-Path -Path $PSScriptRoot\Modules -ChildPath Set-TimeServer)
+Import-Module -Name (Join-Path -Path $PSScriptRoot\Modules -ChildPath Set-Telemetry)
+# Import-Module -Name (Join-Path -Path $PSScriptRoot\Modules -ChildPath Set-Cortana)
+Import-Module -Name (Join-Path -Path $PSScriptRoot\Modules -ChildPath Set-HomeGroup)
+Import-Module -Name (Join-Path -Path $PSScriptRoot\Modules -ChildPath Set-ApplicationFirewallGroup)
 
 Set-PSDebug -Strict
 
@@ -31,7 +36,7 @@ Import-LocalizedData -BindingVariable messages -ErrorAction SilentlyContinue
 
 # Windows Optional Features
 
-[array] $Features = @(
+[Array] $Features = @(
     "Internet-Explorer-Optional-amd64",
     "MediaPlayback",
     "WindowsMediaPlayer",
@@ -40,7 +45,7 @@ Import-LocalizedData -BindingVariable messages -ErrorAction SilentlyContinue
 
 # Windows Firewall Rule Groups
 
-[array] $Groups = @(
+[Array] $Groups = @(
     "windows_ie_ac_001",
     "@{Microsoft.AAD.BrokerPlugin_1000.10240.16384.0_neutral_neutral_cw5n1h2txyewy?ms-resource://Microsoft.AAD.BrokerPlugin/resources/PackageDisplayName}",
     "@{Microsoft.AAD.BrokerPlugin_1000.10586.0.0_neutral_neutral_cw5n1h2txyewy?ms-resource://Microsoft.AAD.BrokerPlugin/resources/PackageDisplayName}",
@@ -132,7 +137,7 @@ foreach ($Feature in $Features) {
 
 foreach ($Group in $Groups) {
     if (Get-NetFirewallRule -Group $Group -ErrorAction SilentlyContinue | Where-Object {$_.Enabled -eq "True"}) {
-        [array] $DisplayName = Get-NetFirewallRule -Group $Group | Select-Object -ExpandProperty DisplayName
+        [Array] $DisplayName = Get-NetFirewallRule -Group $Group | Select-Object -ExpandProperty DisplayName
         $DisplayName = $DisplayName[0]
         $question = Read-Host -Prompt ($messages."Disable Firewall Rule: {0}? [Y/n]" -f $DisplayName)
         if (-not ($question.ToLower() -eq "n")) {
@@ -140,7 +145,7 @@ foreach ($Group in $Groups) {
         }
         Remove-Variable -Name question
     } elseif (Get-NetFirewallRule -Group $Group -ErrorAction SilentlyContinue | Where-Object {$_.Enabled -eq "False"}) {
-        [array] $DisplayName = Get-NetFirewallRule -Group $Group | Select-Object -ExpandProperty DisplayName
+        [Array] $DisplayName = Get-NetFirewallRule -Group $Group | Select-Object -ExpandProperty DisplayName
         $DisplayName = $DisplayName[0]
         $messages."You already disabled the following Firewall Rule: {0}" -f $DisplayName
     }
@@ -195,13 +200,13 @@ if (Set-Telemetry -Action Status) {
     $messages."You already disabled Windows Telemetry."
 }
 
-#if (Set-Cortana -Action Status) {
-#    $question = Read-Host -Prompt "Disable Windows Cortana? [Y/n]"
-#    if (-not ($question.ToLower() -eq "n")) {
-#        Set-Cortana -Action Disable
-#    }
-#    Remove-Variable -Name question
-#}
+# if (Set-Cortana -Action Status) {
+#     $question = Read-Host -Prompt "Disable Windows Cortana? [Y/n]"
+#     if (-not ($question.ToLower() -eq "n")) {
+#         Set-Cortana -Action Disable
+#     }
+#     Remove-Variable -Name question
+# }
 
 if ((Set-TimeServer -Action Current) -eq "Default") {
     $question = Read-Host -Prompt $messages."Set alternative Network Time Servers? [Y/n]"
