@@ -2,7 +2,13 @@
     [String] $PSScriptRoot = Split-Path -Path $MyInvocation.MyCommand.Definition -Parent
 }
 if ($PSVersionTable.PSVersion.Major -lt 3) {
-   [String]] $PSCommandPath = $MyInvocation.MyCommand.Definition
+   [String] $PSCommandPath = $MyInvocation.MyCommand.Definition
+}
+
+if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")) {
+    Start-Process -FilePath "powershell" -WorkingDirectory $PSScriptRoot -Verb runAs `
+                  -ArgumentList "-NoProfile -ExecutionPolicy Bypass -File $PSCommandPath $env:USERNAME"
+    return
 }
 
 Set-Location -Path $PSScriptRoot
@@ -47,7 +53,11 @@ Import-LocalizedData -BindingVariable messages -ErrorAction SilentlyContinue
     "Microsoft.BingNews",
     "Microsoft.Messaging",
     "king.com.CandyCrushSodaSaga",
-    "9E2F88E3.Twitter"
+    "9E2F88E3.Twitter",
+    "Microsoft.OneConnect",
+    "Microsoft.ConnectivityStore",
+    "Microsoft.MicrosoftStickyNotes",
+    "Microsoft.Advertising.Xaml"
 )
 
 # Script starts here
