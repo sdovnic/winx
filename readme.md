@@ -1,15 +1,5 @@
 # Windows 10 Deployment Suite
 
-## Applications
-
-* Removes unnecessary Windows Applications
-
-You will be asked to continue before every step. Please Review the `Applications.ps1` before you execute the Script. You can remove or add your custom actions that fits your need.
-
-To execute run:
-
-    Applications.cmd
-
 ## Deployment
 
 * Removes unnecessary Windows Applications
