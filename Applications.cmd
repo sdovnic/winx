@@ -1,1 +1,0 @@
-@powershell -NoProfile -ExecutionPolicy Bypass -File .\Applications.ps1
