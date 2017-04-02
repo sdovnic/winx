@@ -129,6 +129,27 @@ $Services = @(
 
 # Script starts here
 
+# Cortana
+
+Import-Module -Name (Join-Path -Path $PSScriptRoot\Modules -ChildPath Set-Cortana)
+
+if ((Set-Cortana -Action Status) -eq "True") {
+    $DisplayName = "Cortana"
+    $Choices = @(
+        (New-Object -TypeName System.Management.Automation.Host.ChoiceDescription -ArgumentList ("&{0}" -f $Messages."Yes"), $Messages."Disable"),
+        (New-Object -TypeName System.Management.Automation.Host.ChoiceDescription -ArgumentList ("&{0}" -f $Messages."No"), $Messages."Do nothing")
+    )
+    $Choice = Get-Choice -Choices $Choices -Default 1 -Caption $DisplayName -Message ($Messages."Disable: {0}?" -f $DisplayName)
+    switch ($Choice) {
+        0 {
+            Set-Cortana -Action Disable
+        }
+    }
+} else {
+    $DisplayName = "Cortana"
+    $Messages."You already disabled {0}." -f $DisplayName
+}
+
 # Windows Default Applications
 
 foreach ($Application in $Applications) {

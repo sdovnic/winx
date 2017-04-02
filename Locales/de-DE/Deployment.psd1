@@ -1,6 +1,9 @@
 @{
     "Yes" = "Ja"
     "No" = "Nein"
+    "Disable" = "Deaktivieren"
+    "Disable: {0}?" = "Deaktiviere: {0}?"
+    "You already disabled {0}." = "Sie haben {0} bereits deaktiviert."
     "Do nothing" = "Nichts untenehmen"
     "Remove Application" = "Entferne Anwendung"
     "Remove Application: {0}?" = "Entfernen der Anwendung: {0}?"

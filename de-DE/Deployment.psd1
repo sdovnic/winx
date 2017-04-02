@@ -1,4 +1,7 @@
 @{
+    "Disable" = "Deaktivieren"
+    "Disable: {0}?" = "Deaktiviere: ?"
+    "You already disabled {0}." = "Sie haben {0} bereits deaktiviert."
     "The default answer is yes." = "Die Standard-Antwort ist Ja."
     "Disable Windows Optional Feature: {0}? [Y/n]" = "Deaktivieren des optionalen Windows-Feature: {0}? [J/n]"
     "You already disabled the following Windows Optional Feature: {0}" = "Sie haben das folgende optionale Windows-Feature bereits abgeschaltet: {0}"

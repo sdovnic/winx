@@ -1,6 +1,9 @@
 @{
     "Yes" = "Yes"
     "No" = "No"
+    "Disable" = "Disable"
+    "Disable: {0}?" = "Disable: {0}?"
+    "You already disabled {0}." = "You already disabled {0}."
     "Do nothing" = "Do nothing"
     "Remove Application" = "Remove Application"
     "Remove Application: {0}?" = "Remove Application: {0}?"
