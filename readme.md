@@ -2,6 +2,7 @@
 
 ## Deployment
 
+* Disables Cortana
 * Removes unnecessary Windows Applications
 * Disables unnecessary Firewall Rules
 * Removes unnecessary Optional Windows Features
