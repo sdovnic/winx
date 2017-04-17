@@ -4,7 +4,7 @@
     return
 }
 
-Import-LocalizedData -BindingVariable messages -ErrorAction SilentlyContinue
+Import-LocalizedData -BaseDirectory $PSScriptRoot\Locales -BindingVariable Messages
 
 function Set-Flash {
     <#

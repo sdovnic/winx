@@ -13,7 +13,7 @@ function Set-OneDrive {
         if ($Action.Contains("Status")) {
             $RemoveOneDrive = $false
             [Array] $Folders = @(
-                "$env:LOCALAPPDATA\Microsoft\OneDrive",
+                #"$env:LOCALAPPDATA\Microsoft\OneDrive",
                 "$env:ProgramData\Microsoft OneDrive",
                 "$env:USERPROFILE\OneDrive",
                 "$env:SystemDrive\OneDriveTemp"
@@ -27,10 +27,11 @@ function Set-OneDrive {
                 return $RemoveOneDrive
             }
         } elseif ($Action.Contains("Uninstall")) {
+            Stop-Process -Name OneDrive -ErrorAction SilentlyContinue
             Write-Verbose -Message "Invoking Uninstall from OneDrive"
             Start-Process -FilePath $Path -ArgumentList "/uninstall" -Wait
             [Array] $Folders = @(
-                "$env:LOCALAPPDATA\Microsoft\OneDrive",
+                #"$env:LOCALAPPDATA\Microsoft\OneDrive",
                 "$env:ProgramData\Microsoft OneDrive",
                 "$env:USERPROFILE\OneDrive",
                 "$env:SystemDrive\OneDriveTemp"

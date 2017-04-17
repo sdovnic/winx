@@ -100,6 +100,15 @@ Import-Module -Name (Join-Path -Path $PSScriptRoot\Modules -ChildPath Get-Choice
     "Microsoft.ConnectivityStore",
     "Windows.ContactSupport",
     "Windows.PurchaseDialog"
+    "Microsoft.Microsoft3DViewer",
+    "Microsoft.MSPaint",
+    "EnvironmentsApp",
+    "Holographic Item Player",
+    "Microsoft.PPIProjection",
+    "Microsoft.Windows.HolographicFirstRun",
+    "Microsoft.Windows.OOBENetworkCaptivePortal",
+    "Wallet",
+    "Microsoft.Windows.SecureAssessmentBrowser"
 )
 
 # Windows Services
@@ -147,6 +156,27 @@ if ((Set-Cortana -Action Status) -eq "True") {
     }
 } else {
     $DisplayName = "Cortana"
+    $Messages."You already disabled {0}." -f $DisplayName
+}
+
+# OneDrive
+
+Import-Module -Name (Join-Path -Path $PSScriptRoot\Modules -ChildPath Set-OneDrive)
+
+if ((Set-OneDrive -Action Status) -eq "True") {
+    $DisplayName = "OneDrive"
+    $Choices = @(
+        (New-Object -TypeName System.Management.Automation.Host.ChoiceDescription -ArgumentList ("&{0}" -f $Messages."Yes"), $Messages."Disable"),
+        (New-Object -TypeName System.Management.Automation.Host.ChoiceDescription -ArgumentList ("&{0}" -f $Messages."No"), $Messages."Do nothing")
+    )
+    $Choice = Get-Choice -Choices $Choices -Default 1 -Caption $DisplayName -Message ($Messages."Disable: {0}?" -f $DisplayName)
+    switch ($Choice) {
+        0 {
+            Set-OneDrive -Action Uninstall
+        }
+    }
+} else {
+    $DisplayName = "OneDrive"
     $Messages."You already disabled {0}." -f $DisplayName
 }
 
@@ -236,7 +266,7 @@ foreach ($Service in $Services) {
 }
 
 # HomeProvider
-# OneDrive
+
 # Telemetry
 # TimeServer
 

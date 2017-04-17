@@ -11,9 +11,27 @@ if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdenti
     return
 }
 
-Import-LocalizedData -BindingVariable messages -ErrorAction SilentlyContinue
+Import-LocalizedData -BaseDirectory $PSScriptRoot\Locales -BindingVariable Messages
 
-$messages."The standard answer is no."
+Import-Module -Name (Join-Path -Path $PSScriptRoot\Modules -ChildPath Get-Choice)
+
+if (-not (Get-NetFirewallRule -Name "Secure Shell" -ErrorAction SilentlyContinue)) {
+    $DisplayName = "Secure Shell"
+    $Choices = @(
+        (New-Object -TypeName System.Management.Automation.Host.ChoiceDescription -ArgumentList ("&{0}" -f $Messages."Yes"), $Messages."Allow"),
+        (New-Object -TypeName System.Management.Automation.Host.ChoiceDescription -ArgumentList ("&{0}" -f $Messages."No"), $Messages."Do nothing")
+    )
+    $Choice = Get-Choice -Choices $Choices -Default 1 -Caption $DisplayName -Message ($Messages."Allow all traffic for the Secure Shell Protocol?")
+    switch ($Choice) {
+        0 {
+            New-NetFirewallRule -Name "Secure Shell" -DisplayName "Secure Shell" -Enabled True -Profile Any -Direction Outbound -Action Allow -Protocol "TCP" -RemotePort 22
+        }
+    }
+} else {
+    $Messages."You allready allowed all traffic for the Secure Shell Protocol."
+}
+
+pause
 
 if (-not (Get-NetFirewallRule -Name "Secure Shell" -ErrorAction SilentlyContinue)) {
     $question = Read-Host -Prompt $messages."Allow all traffic for the Secure Shell Protocol? [y/N]"
