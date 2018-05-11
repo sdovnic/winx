@@ -108,7 +108,12 @@ Import-Module -Name (Join-Path -Path $PSScriptRoot\Modules -ChildPath Get-Choice
     "Microsoft.Windows.HolographicFirstRun",
     "Microsoft.Windows.OOBENetworkCaptivePortal",
     "Wallet",
-    "Microsoft.Windows.SecureAssessmentBrowser"
+    "Microsoft.Windows.SecureAssessmentBrowser",
+    "Microsoft.StorePurchaseApp",
+    "Print 3D",
+    "Microsoft Pay",
+    "Microsoft.Windows.Apprep",
+    "Microsoft.Windows.SecHealthUI"
 )
 
 # Windows Services
